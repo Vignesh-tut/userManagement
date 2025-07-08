@@ -1,11 +1,12 @@
 
 
-import { Body, Controller, Delete, Get, InternalServerErrorException, Param, Patch, Post, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, InternalServerErrorException, Param, Patch, Post, UseGuards, ValidationPipe } from '@nestjs/common';
 import { CreateUserDto } from './userDto/userCreateDto';
 import { UserUpdateDto } from './userDto/userUpdateDto';
 import { UserLoginDto } from './userDto/userLoginDto';
 import { UsersService } from './users.service';
 import { SuccessMessage } from 'src/common/success-message.decorator';
+import { AuthGuard } from '@nestjs/passport';
 
 
 
@@ -25,6 +26,7 @@ export class UsersController {
     }
 
     @Get(":userId")
+    @UseGuards(AuthGuard('jwt'))
     @SuccessMessage('user details', 200)
     viewUsers(@Param("userId") id: string) {
         try {

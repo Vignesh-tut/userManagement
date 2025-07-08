@@ -7,6 +7,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Utils } from 'src/common/utils';
 import { ResponseHandler } from 'src/common/response.handler';
 import { BadRequestException } from '@nestjs/common';
+//import { JwtService } from '@nestjs/jwt';
+import { AuthService } from 'src/auth/auth.service';
 
 
 const utils = new Utils();
@@ -14,7 +16,9 @@ const responseHandler = new ResponseHandler();
 
 @Injectable()
 export class UsersService {
-    constructor(@InjectModel("users") private userModel: Model<User>,) { }
+    constructor(@InjectModel("users") private userModel: Model<User>,
+        private readonly authService: AuthService
+    ) { }
 
     async createUser(userData: {}) {
         userData["userId"] = utils.naniod();
@@ -81,7 +85,9 @@ export class UsersService {
             const hashPassword = user?.["password"] ?? "";
             const comparePassword = await utils.comparePasswordHash(userLoginData?.["password"], hashPassword);
             if (comparePassword) {
-                return user;
+                const payLoad = { email: user?.["email"], password: user?.["password"] };
+                return this.authService.generateToken(payLoad);
+
             } else {
                 throw new UnauthorizedException("login failed")
             }
